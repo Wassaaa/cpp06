@@ -1,19 +1,22 @@
 #ifndef SCALARCONVERTER_HPP
 # define SCALARCONVERTER_HPP
 
-#include <iostream>
+# include <iostream>
+# include <cctype>
+# include <regex>
 
 class ScalarConverter
 {
 public:
-	ScalarConverter(const ScalarConverter& other);
-	ScalarConverter& operator=(const ScalarConverter& other);
-	~ScalarConverter();
 
-static void convert(std::string str);
+	static void convert(std::string str);
 
 private:
-	ScalarConverter();
+	ScalarConverter() = delete;
+	ScalarConverter(const ScalarConverter& other) = delete;
+	ScalarConverter& operator=(const ScalarConverter& other) = delete;
+	~ScalarConverter() = delete;
+
 
 };
 
