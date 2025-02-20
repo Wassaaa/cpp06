@@ -42,6 +42,8 @@ test: $(NAME)
 	@./$(NAME) 0
 	@echo "$(GREEN)Test: converting integer -42 $(RESET)"
 	@./$(NAME) -42
+	@echo "$(GREEN)Test: converting integer 167 $(RESET)"
+	@./$(NAME) 167
 	@echo "$(GREEN)Test: converting char c $(RESET)"
 	@./$(NAME) \'c\'
 	@echo "$(GREEN)Test: converting float 42.0f $(RESET)"
@@ -50,6 +52,8 @@ test: $(NAME)
 	@./$(NAME) -4.2f
 	@echo "$(GREEN)Test: converting double -138.456 $(RESET)"
 	@./$(NAME) -138.456
+	@echo "$(GREEN)Test: converting double 111.544 $(RESET)"
+	@./$(NAME) 111
 	@echo "--------------------------------------------"
 	@echo "$(GREEN)Test: converting double nan $(RESET)"
 	@./$(NAME) nan

@@ -20,6 +20,7 @@ struct ScalarValue {
 	float floatValue;
 	double doubleValue;
 	bool isPrintableChar;
+	bool isWithinCharLimits;
 	bool isWithinIntLimits;
 	bool isWithinFloatLimits;
 	bool isWithinDoubleLimits;
@@ -28,6 +29,7 @@ struct ScalarValue {
 	ScalarValue() :
 		isValid(false),
 		isPrintableChar(false),
+		isWithinCharLimits(false),
 		isWithinIntLimits(false),
 		isWithinFloatLimits(false),
 		isWithinDoubleLimits(false),
@@ -97,14 +99,22 @@ static ScalarValue convertChar(const std::string& str)
 {
 	ScalarValue result;
 	result.isValid = true;
+
+	//get the char
 	result.charValue = str[1];
-	result.intValue = static_cast<int>(result.charValue);
-	result.floatValue = static_cast<float>(result.charValue);
-	result.doubleValue = static_cast<double>(result.charValue);
-	// char is always in limits and printable due to regex pattern
+	result.isWithinCharLimits = true;
 	result.isPrintableChar = true;
+
+	// int
+	result.intValue = static_cast<int>(result.charValue);
 	result.isWithinIntLimits = true;
+
+	// float
+	result.floatValue = static_cast<float>(result.charValue);
 	result.isWithinFloatLimits = true;
+
+	// double
+	result.doubleValue = static_cast<double>(result.charValue);
 	result.isWithinDoubleLimits = true;
 
 	return result;
@@ -121,18 +131,21 @@ static ScalarValue convertInt(const std::string& str)
 		result.isWithinIntLimits = true;
 
 		// go for char
-		result.charValue = static_cast<char>(result.intValue);
-		result.isPrintableChar = std::isprint(result.charValue);
+		result.isWithinCharLimits = result.intValue >= 0 && isWithinLimits<char>(result.intValue);
+		if (result.isWithinCharLimits)
+		{
+			result.charValue = static_cast<char>(result.intValue);
+			result.isPrintableChar = std::isprint(result.charValue);
+		}
 
 		// cast double, no exception yet, so int always fits in double
 		result.doubleValue = static_cast<double>(result.intValue);
 		result.isWithinDoubleLimits = true;
 
 		// cast float and check limits
-		result.floatValue = static_cast<float>(result.intValue);
-		result.isWithinFloatLimits =
-			result.intValue >= std::numeric_limits<float>::lowest() &&
-			result.intValue <= std::numeric_limits<float>::max();
+		result.isWithinFloatLimits = isWithinLimits<float>(result.intValue);
+		if (result.isWithinFloatLimits)
+			result.floatValue = static_cast<float>(result.intValue);
 	}
 	catch(const std::exception& e)
 	{
@@ -161,15 +174,17 @@ static ScalarValue convertFloat(const std::string& str)
 			return result;
 
 		// cast and handle int
-		result.intValue = static_cast<int>(result.floatValue);
-		result.isWithinIntLimits =
-			result.floatValue >= std::numeric_limits<int>::lowest() &&
-			result.floatValue <= std::numeric_limits<int>::max();
+		result.isWithinIntLimits = isWithinLimits<int>(result.floatValue);
+		if (result.isWithinIntLimits)
+			result.intValue = static_cast<int>(result.floatValue);
 
 		// cast char using the intValue
-		result.charValue = static_cast<char>(result.intValue);
-		result.isPrintableChar = std::isprint(result.charValue);
-
+		result.isWithinCharLimits = result.intValue >= 0 && isWithinLimits<char>(result.floatValue);
+		if (result.isWithinCharLimits)
+		{
+			result.charValue = static_cast<char>(result.floatValue);
+			result.isPrintableChar = std::isprint(result.charValue);
+		}
 	}
 	catch (const std::exception& e)
 	{
@@ -191,22 +206,24 @@ static ScalarValue convertDouble(const std::string& str)
 
 		// cast to float
 		result.floatValue = static_cast<float>(result.doubleValue);
-		result.isWithinFloatLimits = result.isSpecial || (
-			result.doubleValue >= std::numeric_limits<float>::lowest() &&
-			result.doubleValue <= std::numeric_limits<float>::max());
+		result.isWithinFloatLimits = result.isSpecial || isWithinLimits<float>(result.doubleValue);
 
 		// leave everything else false if special value
 		if (result.isSpecial)
 			return result;
 
 		// cast int, valid double fits all ints
-		result.intValue = static_cast<int>(result.doubleValue);
-		result.isWithinIntLimits = true;
+		result.isWithinIntLimits = isWithinLimits<int>(result.doubleValue);
+		if (result.isWithinIntLimits)
+			result.intValue = static_cast<int>(result.doubleValue);
 
 		// cast char using the intValue
-		result.charValue = static_cast<char>(result.intValue);
-		result.isPrintableChar = std::isprint(result.charValue);
-
+		result.isWithinCharLimits = result.intValue >= 0 && isWithinLimits<char>(result.doubleValue);
+		if (result.isWithinCharLimits)
+		{
+			result.charValue = static_cast<char>(result.intValue);
+			result.isPrintableChar = std::isprint(result.charValue);
+		}
 	}
 	catch (const std::exception& e)
 	{
@@ -215,11 +232,11 @@ static ScalarValue convertDouble(const std::string& str)
 	return result;
 }
 
-void printScalarValue(ScalarValue& value)
+void printScalarValue(const ScalarValue& value)
 {
 		// Print char
 		std::cout << "char: ";
-		if (!value.isValid || !value.isWithinIntLimits || value.isSpecial)
+		if (!value.isValid || !value.isWithinCharLimits || value.isSpecial)
 			std::cout << "impossible";
 		else if (!value.isPrintableChar)
 			std::cout << "Non displayable";
@@ -259,21 +276,24 @@ void ScalarConverter::convert(std::string str)
 	switch (detectType(str))
 	{
 	case CHAR:
-		value = convertChar(str);
+		// std::cout << "found char in " << str << std::endl;
+		printScalarValue(convertChar(str));
 		break;
 	case INT:
-		value = convertInt(str);
+		// std::cout << "found int in " << str << std::endl;
+		printScalarValue(convertInt(str));
 		break;
 	case FLOAT:
-		value = convertFloat(str);
+		// std::cout << "found float in " << str << std::endl;
+		printScalarValue(convertFloat(str));
 		break;
 	case DOUBLE:
-		value = convertDouble(str);
+		// std::cout << "found double in " << str << std::endl;
+		printScalarValue(convertDouble(str));
 		break;
 
 	default:
+		std::cout << "invalid input: " << str << std::endl;
 		break;
 	}
-
-	printScalarValue(value);
 }
