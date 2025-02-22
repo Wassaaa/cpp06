@@ -171,8 +171,8 @@ static ScalarValue convertFloat(const std::string& str)
 			return result;
 
 		result.isWithinIntLimits =
-			result.floatValue >= std::numeric_limits<int>::lowest() &&
-			result.floatValue <= std::numeric_limits<int>::max();
+			result.floatValue >= static_cast<float>(std::numeric_limits<int>::lowest()) &&
+			result.floatValue <= static_cast<float>(std::numeric_limits<int>::max());
 		if (result.isWithinIntLimits)
 			result.intValue = static_cast<int>(result.floatValue);
 
