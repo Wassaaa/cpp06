@@ -38,9 +38,6 @@ struct ScalarValue {
 
 bool isChar(const std::string& str)
 {
-	// check for printable char without single quotes
-	if (str.length() == 1 && std::isprint(static_cast<unsigned char>(str[0])))
-		return true;
 	// regex match printable char in single quotes
 	std::regex charPattern(R"(^'[[:print:]]'$)");
 	return std::regex_match(str, charPattern);
@@ -57,7 +54,7 @@ bool isFloat(const std::string& str)
 {
 	// check for pseudo literals
 	static const std::string special_values[] = {"inff", "+inff", "-inff", "nanf"};
-	for (const auto& special : special_values)
+	for (const std::string& special : special_values)
 		if (str == special) return true;
 
 	// regex match float pattern
@@ -69,7 +66,7 @@ bool isDouble(const std::string& str)
 {
 	// check for pseudo literals
 	static const std::string special_values[] = {"inf", "+inf", "-inf", "nan"};
-	for (const auto& special : special_values)
+	for (const std::string& special : special_values)
 		if (str == special) return true;
 
 	// regex match double pattern
@@ -87,7 +84,7 @@ static LiteralType detectType(const std::string& str)
 		{DOUBLE, isDouble}
 	};
 
-	for (const auto& checker : checkers)
+	for (const TypeChecker& checker : checkers)
 	{
 		if (checker.check(str))
 			return checker.type;
@@ -100,20 +97,20 @@ static ScalarValue convertChar(const std::string& str)
 	ScalarValue result;
 	result.isValid = true;
 
-	//get the char
+	//get the char, we know its printable and witin limits because of the regex
 	result.charValue = str[1];
 	result.isWithinCharLimits = true;
 	result.isPrintableChar = true;
 
-	// int
+	// int is always within char limits
 	result.intValue = static_cast<int>(result.charValue);
 	result.isWithinIntLimits = true;
 
-	// float
+	// float is always within char limits
 	result.floatValue = static_cast<float>(result.charValue);
 	result.isWithinFloatLimits = true;
 
-	// double
+	// double is always within char limits
 	result.doubleValue = static_cast<double>(result.charValue);
 	result.isWithinDoubleLimits = true;
 
