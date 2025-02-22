@@ -259,7 +259,7 @@ void printScalarValue(const ScalarValue& value)
 		if (!value.isValid || !value.isWithinFloatLimits)
 			std::cout << "impossible";
 		else
-			std::cout << std::fixed << std::setprecision(2) << value.floatValue << "f";
+			std::cout << std::fixed << std::setprecision(1) << value.floatValue << "f";
 		std::cout << std::endl;
 
 		// Print double
@@ -267,7 +267,7 @@ void printScalarValue(const ScalarValue& value)
 		if (!value.isValid || !value.isWithinDoubleLimits)
 			std::cout << "impossible";
 		else
-			std::cout << std::fixed << std::setprecision(2) << value.doubleValue;
+			std::cout << std::fixed << std::setprecision(1) << value.doubleValue;
 		std::cout << std::endl;
 }
 
