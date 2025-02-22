@@ -53,7 +53,13 @@ test: $(NAME)
 	@echo "$(GREEN)Test: converting double -138.456 $(RESET)"
 	@./$(NAME) -138.456
 	@echo "$(GREEN)Test: converting double 111.544 $(RESET)"
-	@./$(NAME) 111
+	@./$(NAME) 111.544
+	@echo "$(GREEN)Test: converting int 23434621 (float inaccuracy showing) $(RESET)"
+	@./$(NAME) 23434621
+	@echo "$(GREEN)Test: converting int max 2147483647 $(RESET)"
+	@./$(NAME) 2147483647
+	@echo "$(GREEN)Test: converting int min -2147483648 $(RESET)"
+	@./$(NAME) -2147483648
 	@echo "--------------------------------------------"
 	@echo "$(GREEN)Test: converting double nan $(RESET)"
 	@./$(NAME) nan
